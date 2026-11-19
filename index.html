@@ -16,6 +16,7 @@
   <script defer src="model/scenario-engine.js"></script>
   <script defer src="model/equilibrium.js"></script>
   <script defer src="charts.js"></script>
+  <script defer src="sensitivity.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -67,6 +68,7 @@
           <div id="resultWarnings"></div>
           <section class="chart-panel" aria-labelledby="chartTitle"><span class="eyebrow">03 · VISUALIZAÇÃO</span><h3 id="chartTitle">Comparação e evolução</h3><p>Custo econômico expresso no fim do horizonte, sem confundir com parcelas pagas.</p><div id="comparisonChart"></div><div class="chart-legend" aria-hidden="true"><span><i class="legend-nominal"></i> Caixa nominal acumulado</span><span><i class="legend-equivalent"></i> Contribuição ao valor equivalente final</span></div><div id="timelineChart"></div><p class="chart-note">As curvas são contribuições acumuladas dos eventos ocorridos até cada mês. A evolução do valor equivalente <strong>não</strong> representa o saldo de uma aplicação financeira.</p></section>
           <div id="breakEvenPanel"></div>
+          <section class="sensitivity-panel" aria-labelledby="sensitivityHeading"><span class="eyebrow">05 · SENSIBILIDADE</span><h3 id="sensitivityHeading">Revenda × aluguel</h3><p>Como muda a estratégia de menor custo quando variam as hipóteses de revenda e mensalidade da locação?</p><div id="sensitivityPanel"></div></section>
           <section class="audit-panel" aria-label="Memória de cálculo mensal">
             <div class="audit-title"><div><span class="eyebrow">03 · AUDITORIA</span><h3>Memória de cálculo</h3></div><button type="button" class="button button-quiet" id="downloadCsv">Baixar CSV</button></div>
             <div id="auditPanel"></div>
