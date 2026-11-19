@@ -99,7 +99,7 @@ function get(path){
  const value=path.split('.').reduce((x,k)=>x?.[k],state);
  if(value!==undefined)return value;
  const standard=defaults.createDefaultConfig();
- return path==='subscription.contractMonths'?state.horizonMonths:path.split('.').reduce((x,k)=>x?.[k],standard);
+ return path==='subscription.contractMonths'?'':path.split('.').reduce((x,k)=>x?.[k],standard);
 }
 function set(path,value){const keys=path.split('.');let x=state;for(const k of keys.slice(0,-1))x=x[k];x[keys[keys.length-1]]=value}
 function el(id){return document.getElementById(id)}
