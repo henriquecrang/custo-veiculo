@@ -3,6 +3,7 @@
 const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
 const equilibrium=window.CustoVeiculoEquilibrium;
+const sensitivity=window.CustoVeiculoSensitivity;
 const charts=window.CustoVeiculoCharts;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
 const STORAGE_KEY='custo-veiculo-simulacao-v1';
@@ -130,6 +131,21 @@ function renderCharts(comp){
  const selected=comp.results.find(x=>x.id===auditedScenario)||comp.results[0];
  el("timelineChart").innerHTML=charts.makeTimeline(selected);
 }
+
+function renderSensitivity(cfg){
+ if(!sensitivity)return;
+ const data=sensitivity.calculate(cfg);
+ const heads=data.resaleFactors.map(f=>'<th scope="col">'+(100*f).toFixed(0)+'%<small>'+money(data.baseResalePrice*f)+'</small></th>').join('');
+ const rows=data.rows.map((row,r)=>'<tr><th scope="row">'+(100*row.rentFactor).toFixed(0)+'%<small>'+money(data.baseMonthlyRent*row.rentFactor)+'/mês</small></th>'+
+ row.cells.map((cell,c)=>{
+  const isBase=r===2&&c===2;
+  const label=scenarioNames[cell.winnerId]||cell.winnerId;
+  return '<td class="'+(isBase?'sensitivity-base':'')+'" title="'+escapeCell('Vencedor: '+label+'; custo equivalente '+money(cell.cost))+'">'+
+   '<span class="sensitivity-winner">'+escapeCell(label)+'</span><small>'+money(cell.cost)+'</small></td>';
+ }).join('')+'</tr>').join('');
+ el('sensitivityPanel').innerHTML='<div class="table-scroll"><table class="sensitivity-table"><caption>Vencedor financeiro por hipótese. Colunas: preço de revenda de referência; linhas: mensalidade do aluguel. 100% é o cenário atual. Os valores menores de custo são preferíveis.</caption><thead><tr><th scope="col">Aluguel \\ Revenda</th>'+heads+'</tr></thead><tbody>'+rows+'</tbody></table></div><p class="chart-note">A grade considera todas as estratégias selecionadas. Não representa probabilidade dos preços; altere os valores-base nos campos acima para estudar outras hipóteses.</p>';
+}
+
 function renderBreakEven(cfg,comp){
  if(!comp.results.some(x=>x.id==='subscription')){el('breakEvenPanel').innerHTML='';return}
  const purchases=comp.results.filter(x=>x.id!=='subscription');
@@ -166,6 +182,7 @@ function renderResults(){
  renderAudit(result);
  renderCharts(result);
  renderBreakEven(state,result);
+ renderSensitivity(state);
 }
 function handleEditor(evt){
  const control=evt.target.closest('[data-path]');
