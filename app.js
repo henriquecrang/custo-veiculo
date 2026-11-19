@@ -2,6 +2,7 @@
 'use strict';
 const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
+const equilibrium=window.CustoVeiculoEquilibrium;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
 const STORAGE_KEY='custo-veiculo-simulacao-v1';
 function readSavedState(){
@@ -122,6 +123,17 @@ function renderAudit(comp){
  e.contributions.map(c=>'<tr><td>'+c.month+'</td><td>'+escapeCell(c.category)+'</td><td>'+escapeCell(c.description)+'</td><td>'+money(c.amount)+'</td><td>'+money(c.equivalentCost)+'</td><td>'+money(c.opportunityCost)+'</td></tr>').join('')+
  '</tbody></table></div></details>';
 }
+function renderBreakEven(cfg,comp){
+ if(!comp.results.some(x=>x.id==='subscription')){el('breakEvenPanel').innerHTML='';return}
+ const purchases=comp.results.filter(x=>x.id!=='subscription');
+ if(!purchases.length){el('breakEvenPanel').innerHTML='';return}
+ const rows=purchases.map(x=>{
+  const rental=equilibrium.breakEvenMonthlyRent(cfg,x.id);
+  const sale=equilibrium.breakEvenResalePrice(cfg,x.id);
+  return '<tr><td>'+scenarioNames[x.id]+'</td><td>'+(rental?money(rental.monthlyRent):'Sem solução')+'</td><td>'+(sale?money(sale.requiredReferencePrice):'Sem solução')+'</td></tr>';
+ }).join('');
+ el('breakEvenPanel').innerHTML='<section class="equilibrium-panel"><span class="eyebrow">04 · PONTOS DE EQUILÍBRIO</span><h3>Quando a decisão muda?</h3><p>Aluguel mensal que empata com a compra e preço referência de revenda que empata com o aluguel configurado. Mesmo horizonte e oportunidade financeira.</p><div class="table-scroll"><table class="audit-table"><thead><tr><th>Estratégia de compra</th><th>Aluguel de equilíbrio/mês</th><th>Revenda referência de equilíbrio</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
+}
 function renderResults(){
  const err=defaults.validateConfig(state);
  const errors=el('errors');
@@ -145,6 +157,7 @@ function renderResults(){
  }).join('');
  el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
  renderAudit(result);
+ renderBreakEven(state,result);
 }
 function handleEditor(evt){
  const control=evt.target.closest('[data-path]');
