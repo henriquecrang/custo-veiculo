@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "name": "Rio — seminovo R$ 60 mil, entrada 50%, 12 meses, 0 km",
+  "horizonMonths": 12,
+  "selectedScenarioIds": [
+    "cash-private",
+    "cash-dealer",
+    "loan-private",
+    "loan-dealer",
+    "subscription"
+  ],
+  "vehicle": {
+    "name": "Seminovo hipotético R$ 60 mil",
+    "price": 60000,
+    "ageYears": 4,
+    "residualMethod": "fixed",
+    "residualPrice": 54000,
+    "annualDepreciationRate": 0.1
+  },
+  "financing": {
+    "downPayment": 30000,
+    "termMonths": 36,
+    "monthlyInterestRate": 0.0196,
+    "amortization": "price",
+    "financedCosts": 0,
+    "upfrontCosts": 0,
+    "payoffCosts": 0,
+    "iof": {
+      "mode": "manual",
+      "amount": 0,
+      "financed": false,
+      "additionalRate": 0,
+      "dailyRate": 0,
+      "daysPerMonth": 30,
+      "maxDays": 365
+    }
+  },
+  "purchase": {
+    "initialCosts": 0
+  },
+  "ownership": {
+    "ipvaAnnual": 2400,
+    "ipvaFirstMonth": 1,
+    "insuranceAnnual": 3300,
+    "insuranceFirstMonth": 1,
+    "licensingAnnual": 0,
+    "licensingFirstMonth": 1,
+    "maintenanceMonthly": 100,
+    "garageMonthly": 0,
+    "kmPerMonth": 0,
+    "costPerKm": 0
+  },
+  "resale": {
+    "privateDiscountPct": 0,
+    "privateFixedCosts": 300,
+    "dealerDiscountPct": 0.15,
+    "dealerFixedCosts": 0
+  },
+  "subscription": {
+    "vehicleName": "Argo 1.0 de assinatura (não equivalente)",
+    "monthlyRent": 2299,
+    "paymentTiming": "end",
+    "upfrontCosts": 0,
+    "deposit": 0,
+    "refundedDepositPct": 1,
+    "monthlyExtras": 0,
+    "endCosts": 0,
+    "included": [
+      "ipva",
+      "insurance",
+      "maintenance",
+      "licensing"
+    ]
+  },
+  "economics": {
+    "opportunityAnnualNet": 0.1126,
+    "inflationAnnual": 0.043
+  }
+}
