@@ -46,6 +46,8 @@ const groups=[
  ]},
  {title:'Veículo e compra',fields:[
   {path:'vehicle.name',label:'Veículo adquirido',type:'text',wide:true},
+  {path:'vehicle.category',label:'Categoria',type:'select',options:[['unknown','Não informado'],['compact','Hatch / compacto'],['sedan','Sedã'],['suv','SUV'],['other','Outro']]},
+  {path:'vehicle.condition',label:'Condição do carro comprado',type:'select',options:[['unknown','Não informado'],['new','Zero-quilômetro'],['used','Seminovo / usado']]},
   {path:'vehicle.price',label:'Preço de compra',unit:'R$',prefix:true,step:1000},
   {path:'vehicle.ageYears',label:'Idade aproximada',unit:'anos',step:1},
   {path:'vehicle.residualMethod',label:'Projeção de revenda',type:'select',options:[['fixed','Valor informado'],['annual-rate','Depreciação anual']],wide:true},
@@ -80,6 +82,10 @@ const groups=[
  ]},
  {title:'Assinatura / locação',fields:[
   {path:'subscription.vehicleName',label:'Veículo ofertado por assinatura',type:'text',wide:true},
+  {path:'subscription.category',label:'Categoria da assinatura',type:'select',options:[['unknown','Não informado'],['compact','Hatch / compacto'],['sedan','Sedã'],['suv','SUV'],['other','Outro']]},
+  {path:'subscription.condition',label:'Condição do veículo alugado',type:'select',options:[['unknown','Não informado'],['new','Zero-quilômetro'],['used','Seminovo / usado']]},
+  {path:'subscription.contractMonths',label:'Prazo contratual declarado',unit:'meses',step:1,help:'Informativo: o motor sempre simula pagamentos por todo o horizonte. Se forem diferentes, reveja renovações e multas.'},
+  {path:'subscription.equivalenceConfirmed',label:'Confirmei veículos equivalentes',type:'select',bool:true,options:[['false','Não — ainda não conferi'],['true','Sim — conferi itens e coberturas']],wide:true,help:'Só marque Sim após verificar proposta, características e cobertura. Condição/categoria/prazo divergentes continuam sinalizados.'},
   {path:'subscription.monthlyRent',label:'Mensalidade de locação',unit:'R$',prefix:true,step:100},
   {path:'subscription.paymentTiming',label:'Vencimento mensal',type:'select',options:[['end','Fim do mês'],['start','Início do mês']]},
   {path:'subscription.upfrontCosts',label:'Adesão/taxas iniciais',unit:'R$',prefix:true,step:100},
@@ -89,14 +95,19 @@ const groups=[
   {path:'subscription.endCosts',label:'Custos de devolução',unit:'R$',prefix:true,step:100}
  ]}
 ];
-function get(path){return path.split('.').reduce((x,k)=>x?.[k],state)}
+function get(path){
+ const value=path.split('.').reduce((x,k)=>x?.[k],state);
+ if(value!==undefined)return value;
+ const standard=defaults.createDefaultConfig();
+ return path==='subscription.contractMonths'?state.horizonMonths:path.split('.').reduce((x,k)=>x?.[k],standard);
+}
 function set(path,value){const keys=path.split('.');let x=state;for(const k of keys.slice(0,-1))x=x[k];x[keys[keys.length-1]]=value}
 function el(id){return document.getElementById(id)}
 function fieldMarkup(field){
  const v=get(field.path);
  const value=field.pct ? (v*100) : v;
  const input=field.type==='select'
-  ? '<select data-path="'+field.path+'">'+field.options.map(([key,label])=>'<option value="'+key+'" '+(v===key?'selected':'')+'>'+label+'</option>').join('')+'</select>'
+  ? '<select data-path="'+field.path+'">'+field.options.map(([key,label])=>'<option value="'+key+'" '+(String(v)===key?'selected':'')+'>'+label+'</option>').join('')+'</select>'
   : '<input data-path="'+field.path+'" type="'+(field.type==='text'?'text':'number')+'" '+(field.type==='text'?'':'step="'+(field.step||1)+'"')+' value="'+String(value).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+'">';
  return '<label class="field '+(field.wide?'wide':'')+'"><span class="field-label">'+field.label+'</span><span class="control">'+
   (field.prefix?'<span class="unit prefix">'+field.unit+'</span>':'')+input+
@@ -169,17 +180,17 @@ function renderResults(){
  const index=Object.fromEntries(result.results.map(x=>[x.id,x]));
  const winner=index[result.leastCostScenarioId];
  const runner=result.rankedScenarioIds[1] ? index[result.rankedScenarioIds[1]] : null;
- el('resultSummary').innerHTML='<div class="summary"><span class="eyebrow">MENOR CUSTO ECONÔMICO</span><div class="big">'+scenarioNames[winner.id]+'</div><p>Considerando '+state.horizonMonths+' meses e taxa alternativa de '+percent(state.economics.opportunityAnnualNet)+' líquida a.a.</p><div class="stats"><div><small>Total equivalente</small><strong>'+money(winner.economic.equivalentCost)+'</strong></div><div><small>Mensal equivalente</small><strong>'+money(winner.economic.monthlyEquivalent)+'</strong></div>'+(runner?'<div><small>Diferença para o 2º</small><strong>'+money(runner.economic.equivalentCost-winner.economic.equivalentCost)+'</strong></div>':'')+'</div></div>';
+ el('resultSummary').innerHTML='<div class="summary"><span class="eyebrow">'+((result.comparability?.status==='mismatch'||result.comparability?.status==='unverified')?'MENOR CUSTO SIMULADO · EQUIVALÊNCIA NÃO CONFIRMADA':'MENOR CUSTO ECONÔMICO')+'</span><div class="big">'+scenarioNames[winner.id]+'</div><p>Considerando '+state.horizonMonths+' meses e taxa alternativa de '+percent(state.economics.opportunityAnnualNet)+' líquida a.a.</p><div class="stats"><div><small>Total equivalente</small><strong>'+money(winner.economic.equivalentCost)+'</strong></div><div><small>Mensal equivalente</small><strong>'+money(winner.economic.monthlyEquivalent)+'</strong></div>'+(runner?'<div><small>Diferença para o 2º</small><strong>'+money(runner.economic.equivalentCost-winner.economic.equivalentCost)+'</strong></div>':'')+'</div></div>';
  el('resultCards').innerHTML=result.results.map(s=>{
   const e=s.economic;
   const financial=s.loan ? '<span>Parcela inicial: '+money(s.loan.schedule.rows[1].payment)+'</span><span>Saldo para quitar: '+money(s.debtSettlement.remainingPrincipal)+'</span>' : '';
   const sale=s.sale ? '<span>Revenda líquida: '+money(s.sale.netProceeds)+'</span><span>Disponível após quitar: '+money(s.terminalNetFromSale)+'</span>' : '';
   return '<article class="result-card '+(s.id===winner.id?'best':'')+'"><div class="top"><div><div class="name">'+scenarioNames[s.id]+'</div>'+(s.id===winner.id?'<div class="best-tag">MENOR CUSTO</div>':'')+'</div><div class="total">'+money(e.equivalentCost)+'</div></div>'+
   '<div class="meta"><span>Mensal equivalente: '+money(e.monthlyEquivalent)+'</span><span>Desembolso líquido nominal: '+money(e.nominalCost)+'</span><span>Custo de oportunidade: '+money(e.opportunityCost)+'</span></div>'+
-  '<div class="result-details"><span>Capital de caixa máximo exigido: <strong>'+money(e.maxCapitalNeed)+'</strong></span><span>Saída no início: <strong>'+money(s.acquisitionCash)+'</strong></span>'+financial+sale+'</div>'+
+  '<div class="result-details"><span>Disponibilidade modelada: <strong>'+state.horizonMonths+' meses</strong></span>'+(s.id==='subscription'?'<span>Prazo de assinatura declarado: <strong>'+((state.subscription.contractMonths??null)===null?'não informado':state.subscription.contractMonths+' meses')+'</strong></span>':'')+'<span>Capital de caixa máximo exigido: <strong>'+money(e.maxCapitalNeed)+'</strong></span><span>Saída no início: <strong>'+money(s.acquisitionCash)+'</strong></span>'+financial+sale+'</div>'+
   '</article>';
  }).join('');
- el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
+ el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel"><strong>Atenção à comparabilidade:</strong><ul>'+result.warnings.map(x=>'<li>'+escapeCell(x)+'</li>').join('')+'</ul><p>Todos os cenários simulados fornecem veículo por '+state.horizonMonths+' meses. Isso não garante que o contrato de assinatura permita essa duração; verifique a proposta.</p></div>':'';
  renderAudit(result);
  renderCharts(result);
  renderBreakEven(state,result);
@@ -191,7 +202,7 @@ function handleEditor(evt){
  const descriptor=groups.flatMap(g=>g.fields).find(f=>f.path===control.dataset.path);
  if(!descriptor)return;
  const v=descriptor.type==='text'||descriptor.type==='select'
-  ? control.value : (control.value.trim()===''?NaN:Number(control.value)/(descriptor.pct?100:1));
+  ? (descriptor.bool?control.value==='true':control.value) : (control.value.trim()===''?NaN:Number(control.value)/(descriptor.pct?100:1));
  set(descriptor.path,v);
  renderResults();
 }
