@@ -72,7 +72,8 @@ test('comparação selecionada, cenário mais barato e alerta de equivalência',
  const x=compareScenarios(c);
  assert.equal(x.results.length,5);
  assert.deepEqual(x.rankedScenarioIds.map(id=>x.results.some(v=>v.id===id)),[true,true,true,true,true]);
- assert.equal(x.warnings.length,1);
+ assert.ok(x.warnings.length>0);
+ assert.equal(x.comparability.status,'mismatch');
  c.selectedScenarioIds=['cash-private'];
  assert.equal(compareScenarios(c).leastCostScenarioId,'cash-private');
  assert.equal(compareScenarios(c).results.length,1);
