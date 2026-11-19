@@ -15,6 +15,7 @@
   <script defer src="model/rental.js"></script>
   <script defer src="model/scenario-engine.js"></script>
   <script defer src="model/equilibrium.js"></script>
+  <script defer src="sensitivity.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -65,6 +66,7 @@
           <div id="resultCards" class="result-list"></div>
           <div id="resultWarnings"></div>
           <div id="breakEvenPanel"></div>
+          <section class="sensitivity-panel" aria-labelledby="sensitivityHeading"><span class="eyebrow">05 · SENSIBILIDADE</span><h3 id="sensitivityHeading">Revenda × aluguel</h3><p>Como muda a estratégia de menor custo quando variam as hipóteses de revenda e mensalidade da locação?</p><div id="sensitivityPanel"></div></section>
           <section class="audit-panel" aria-label="Memória de cálculo mensal">
             <div class="audit-title"><div><span class="eyebrow">03 · AUDITORIA</span><h3>Memória de cálculo</h3></div><button type="button" class="button button-quiet" id="downloadCsv">Baixar CSV</button></div>
             <div id="auditPanel"></div>
