@@ -31,7 +31,10 @@
         amortization: 'price',
         financedCosts: 0,
         upfrontCosts: 0,
-        payoffCosts: 0
+        payoffCosts: 0,
+        // IOF não tem alíquota legal presumida: informar valor ou taxas comprovadas.
+        iof: { mode: 'manual', amount: 0, financed: false,
+          additionalRate: 0, dailyRate: 0, daysPerMonth: 30, maxDays: 365 }
       },
       purchase: { initialCosts: 0 },
       ownership: {
@@ -82,6 +85,11 @@
     'financing.financedCosts': [0, Infinity],
     'financing.upfrontCosts': [0, Infinity],
     'financing.payoffCosts': [0, Infinity],
+    'financing.iof.amount': [0, Infinity],
+    'financing.iof.additionalRate': [0, 1],
+    'financing.iof.dailyRate': [0, 1],
+    'financing.iof.daysPerMonth': [1, 31, true],
+    'financing.iof.maxDays': [1, 3650, true],
     'purchase.initialCosts': [0, Infinity],
     'ownership.ipvaAnnual': [0, Infinity],
     'ownership.ipvaFirstMonth': [1, 12, true],
@@ -129,6 +137,8 @@
     }
     if (!['fixed','annual-rate'].includes(field(cfg,'vehicle.residualMethod'))) errors.push('vehicle.residualMethod inválido');
     if (!['price','sac'].includes(field(cfg,'financing.amortization'))) errors.push('financing.amortization inválido');
+    if (!['manual','amortization-proxy'].includes(field(cfg,'financing.iof.mode'))) errors.push('financing.iof.mode inválido');
+    if (typeof field(cfg,'financing.iof.financed') !== 'boolean') errors.push('financing.iof.financed inválido');
     if (!['start','end'].includes(field(cfg,'subscription.paymentTiming'))) errors.push('subscription.paymentTiming inválido');
     for (const key of ['vehicle.name','subscription.vehicleName']) {
       if (typeof field(cfg,key) !== 'string') errors.push(key + ' precisa ser texto');
