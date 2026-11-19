@@ -45,3 +45,16 @@ h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-.05e
 .sensitivity-table small{display:block;margin-top:3px;color:var(--muted);font-size:.67rem}
 .sensitivity-table td{background:#f8fafc}.sensitivity-table .sensitivity-base{border:2px solid var(--blue);background:#eff5ff}
 .sensitivity-winner{display:block;font-weight:700;line-height:1.25}.sensitivity-panel .chart-note{margin-top:10px}
+
+.guided-dialog{border:1px solid var(--line);border-radius:17px;padding:0;width:min(92vw,650px);max-height:min(88vh,800px);color:var(--text);box-shadow:0 20px 80px #17203333}
+.guided-dialog::backdrop{background:#17203370}.guided-shell{padding:22px;overflow:auto;max-height:88vh}
+.guided-header{display:flex;justify-content:space-between;gap:14px;align-items:start}.guided-header h2{font-size:1.35rem}.guided-header p{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.guided-progress{margin:16px 0;border-top:1px solid var(--line);padding-top:12px;font-size:.75rem;font-weight:800;color:var(--blue)}
+.guided-question{margin:17px 0 34px}.guided-question label{display:block;font-weight:760;font-size:.96rem;margin-bottom:10px}
+.guided-question input,.guided-question select{max-width:100%;width:100%;font-size:1.07rem;padding:12px;border:1px solid #cfd6e2;border-radius:10px;background:#fff}
+.guided-unit{font-size:.73rem;color:var(--muted);display:block;margin:5px 0}.guided-question .helper{font-size:.76rem;color:var(--muted);margin-top:7px}
+.guided-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:13px;border-top:1px solid var(--line);padding-top:15px}.guided-nav{display:flex;gap:7px}
+.guided-error{border:1px solid #e5b9b9;background:#fff4f4;color:var(--red);padding:10px;border-radius:8px;font-size:.79rem}
+.guided-review{display:grid;gap:7px;margin-bottom:15px}.guided-review-row{display:flex;justify-content:space-between;gap:12px;align-items:center;text-align:left;background:white;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:.77rem;color:var(--text)}
+.guided-review-row strong{text-align:right}.guided-review-row:hover{background:var(--soft)}
+@media(max-width:640px){.guided-shell{padding:15px}.guided-actions{display:grid}.guided-nav{justify-content:space-between}}
