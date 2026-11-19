@@ -3,6 +3,7 @@
 const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
 const equilibrium=window.CustoVeiculoEquilibrium;
+const charts=window.CustoVeiculoCharts;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
 const STORAGE_KEY='custo-veiculo-simulacao-v1';
 function readSavedState(){
@@ -123,6 +124,12 @@ function renderAudit(comp){
  e.contributions.map(c=>'<tr><td>'+c.month+'</td><td>'+escapeCell(c.category)+'</td><td>'+escapeCell(c.description)+'</td><td>'+money(c.amount)+'</td><td>'+money(c.equivalentCost)+'</td><td>'+money(c.opportunityCost)+'</td></tr>').join('')+
  '</tbody></table></div></details>';
 }
+function renderCharts(comp){
+ if(!charts)return;
+ el("comparisonChart").innerHTML=charts.makeBars(comp.results,scenarioNames);
+ const selected=comp.results.find(x=>x.id===auditedScenario)||comp.results[0];
+ el("timelineChart").innerHTML=charts.makeTimeline(selected);
+}
 function renderBreakEven(cfg,comp){
  if(!comp.results.some(x=>x.id==='subscription')){el('breakEvenPanel').innerHTML='';return}
  const purchases=comp.results.filter(x=>x.id!=='subscription');
@@ -157,6 +164,7 @@ function renderResults(){
  }).join('');
  el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
  renderAudit(result);
+ renderCharts(result);
  renderBreakEven(state,result);
 }
 function handleEditor(evt){
@@ -182,6 +190,7 @@ el('auditPanel').addEventListener('change',event=>{
  if(event.target.id==='auditScenario' && lastComparison){
   auditedScenario=event.target.value;
   renderAudit(lastComparison);
+  renderCharts(lastComparison);
  }
 });
 el('downloadCsv').addEventListener('click',()=>{
