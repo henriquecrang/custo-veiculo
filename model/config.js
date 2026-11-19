@@ -18,6 +18,8 @@
       selectedScenarioIds: [...SCENARIOS],
       vehicle: {
         name: 'Seminovo hipotético de R$ 80 mil',
+        category: 'unknown',
+        condition: 'used',
         price: 80000,
         ageYears: 3,
         residualMethod: 'fixed',
@@ -57,6 +59,10 @@
       },
       subscription: {
         vehicleName: 'Argo 1.0 (não equivalente ao carro adquirido)',
+        category: 'compact',
+        condition: 'new',
+        contractMonths: 12,
+        equivalenceConfirmed: false,
         monthlyRent: 2299,
         paymentTiming: 'end',
         upfrontCosts: 0,
@@ -149,6 +155,23 @@
     }
     if (typeof field(cfg,'vehicle.price') === 'number' && typeof field(cfg,'financing.downPayment') === 'number' &&
         cfg.financing.downPayment > cfg.vehicle.price) errors.push('financing.downPayment supera vehicle.price');
+    // Metadados opcionais: JSONs versão 1 anteriores continuam importáveis.
+    const categories=['unknown','compact','sedan','suv','other'];
+    const conditions=['unknown','new','used'];
+    for(const key of ['vehicle.category','subscription.category']){
+      const value=field(cfg,key);
+      if(value!==undefined&&!categories.includes(value))errors.push(key+' inválido');
+    }
+    for(const key of ['vehicle.condition','subscription.condition']){
+      const value=field(cfg,key);
+      if(value!==undefined&&!conditions.includes(value))errors.push(key+' inválido');
+    }
+    const contract=field(cfg,'subscription.contractMonths');
+    if(contract!==undefined&&(!Number.isInteger(contract)||contract<1||contract>60))
+      errors.push('subscription.contractMonths inválido: usar entre 1 e 60');
+    const confirmed=field(cfg,'subscription.equivalenceConfirmed');
+    if(confirmed!==undefined&&typeof confirmed!=='boolean')
+      errors.push('subscription.equivalenceConfirmed precisa ser booleano');
     return errors;
   }
 

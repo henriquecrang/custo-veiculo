@@ -10,7 +10,7 @@ test('interface carrega todos os módulos na ordem antes do editor',()=>{
  const scripts=Array.from(html.matchAll(/<script defer src="([^"]+)"/g),m=>m[1]);
  assert.deepEqual(scripts,['model/config.js','model/cashflows.js','model/financing.js',
    'model/finance-fees.js','model/ownership.js','model/resale.js','model/rental.js',
-   'model/scenario-engine.js','model/equilibrium.js','charts.js','sensitivity.js','guided-setup.js','app.js']);
+   'model/comparability.js','model/scenario-engine.js','model/equilibrium.js','charts.js','sensitivity.js','guided-setup.js','app.js']);
  assert.match(html,/id="inputSections"/);
  assert.match(html,/id="resultSummary"/);
 });

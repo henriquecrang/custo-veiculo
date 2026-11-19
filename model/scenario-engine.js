@@ -7,13 +7,14 @@
     browser ? root.CustoVeiculoFinanceFees : require('./finance-fees.js'),
     browser ? root.CustoVeiculoOwnership : require('./ownership.js'),
     browser ? root.CustoVeiculoResale : require('./resale.js'),
-    browser ? root.CustoVeiculoRental : require('./rental.js')
+    browser ? root.CustoVeiculoRental : require('./rental.js'),
+    browser ? root.CustoVeiculoComparability : require('./comparability.js')
   );
   if (!browser) module.exports = api;
   root.CustoVeiculoEngine = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function(config, cashflows, financing, financeFees, ownership, resale, rental) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(config, cashflows, financing, financeFees, ownership, resale, rental, comparability) {
   'use strict';
-  if([config,cashflows,financing,financeFees,ownership,resale,rental].some(x=>!x))
+  if([config,cashflows,financing,financeFees,ownership,resale,rental,comparability].some(x=>!x))
     throw new Error('Todos os módulos financeiros são obrigatórios');
   const { assertValidConfig, SCENARIOS } = config;
   const { makeEvent, evaluateCashFlows } = cashflows;
@@ -100,12 +101,12 @@
     assertValidConfig(cfg);
     const results=cfg.selectedScenarioIds.map(id=>runScenario(cfg,id));
     const ranked=[...results].sort((a,b)=>a.economic.equivalentCost-b.economic.equivalentCost);
-    const warnings=[];
-    if(cfg.selectedScenarioIds.includes('subscription') &&
-      cfg.subscription.vehicleName!==cfg.vehicle.name) warnings.push('Carros/modelos comparados não são necessariamente equivalentes.');
+    const quality=comparability.assess(cfg,cfg.selectedScenarioIds);
+    const warnings=quality.warnings;
     return { schemaVersion:cfg.schemaVersion,horizonMonths:cfg.horizonMonths,
       opportunityAnnualNet:cfg.economics.opportunityAnnualNet,
-      results,rankedScenarioIds:ranked.map(x=>x.id),leastCostScenarioId:ranked[0].id,warnings };
+      results,rankedScenarioIds:ranked.map(x=>x.id),leastCostScenarioId:ranked[0].id,warnings,
+      comparability:quality };
   }
 
   return { loanTerms, runScenario, compareScenarios };
