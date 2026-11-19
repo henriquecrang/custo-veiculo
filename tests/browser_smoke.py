@@ -155,6 +155,7 @@ class BrowserSmoke(unittest.TestCase):
             })""")
             self.fail("Import did not update local state: " + json.dumps(diagnostic))
         expect(page.locator("#errors")).to_be_hidden()
+        expect(page.locator("#saveStatus")).to_contain_text("importada")
         self.assertEqual(self.saved()["vehicle"]["price"], original["vehicle"]["price"])
         page.locator("#importFile").set_input_files({
             "name": "invalido.json", "mimeType": "application/json",
