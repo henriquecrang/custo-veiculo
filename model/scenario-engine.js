@@ -91,7 +91,8 @@
       estimatedCet,
       terminalSaleCash:totalSaleCash,
       terminalNetFromSale:totalSaleCash-(debtSettlement ? debtSettlement.totalDue:0),
-      acquisitionCash:-sum('purchase')-sum('down-payment')-sum('purchase-fees')-sum('financing-fees')
+      // Inclui caução e primeira mensalidade antecipada na liquidez inicial.
+      acquisitionCash:-events.filter(e=>e.month===0 && e.amount<0).reduce((total,e)=>total+e.amount,0)
     };
   }
 
