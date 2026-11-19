@@ -153,7 +153,7 @@ el('restoreButton').addEventListener('click',()=>{
 });
 el('exportButton').addEventListener('click',()=>{
  if(defaults.validateConfig(state).length){window.alert('Corrija os campos inválidos antes de exportar.');return}
- const blob=new Blob([JSON.stringify(state,null,2)+'\\n'],{type:'application/json'});
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob);
  const link=document.createElement('a');
  link.href=url;
