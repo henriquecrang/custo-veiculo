@@ -79,16 +79,19 @@ Nunca converter hipótese ilustrativa em obrigação legal, taxa garantida ou of
 - Custos por uso real: combustível, manutenção por km, pneus, garagem, estacionamento, pedágios.
 - CDI/benchmark financeiro: taxa líquida por prazo e incidência efetiva de IR, sem multiplicar uma taxa bruta fixa por (1−IR) automaticamente.
 
-## 5. Evolução recomendada para o produto
+## 5. Proveniência registrada no JSON e na interface
 
-O esquema de configuração e a UI devem permitir associar metadados de evidência a cada parâmetro:
-- origem (entrada própria, derivação, referência oficial, cotação, hipótese);
-- data de coleta e período de vigência;
-- URL ou identificador do documento, sem informação pessoal;
-- observação de abrangência e se foi confirmado;
-- distinção **não informado** versus **informado igual a zero**.
+A configuração versão 1 permite um campo **opcional** `evidence`, que mapeia caminhos de premissas financeiras a metadados documentais.
 
-Essa camada **ainda não está implementada no schema/na UI**. Enquanto isso, este documento deve ser a referência textual de calibração, e valores ilustrativos jamais podem ser vendidos como cotação.
+- `kind`: `hypothesis`, `official`, `quote`, `user-input`, `derived` ou `unknown`.
+- `asOf`: data ISO AAAA-MM-DD; `note` e `url` HTTPS opcionais.
+- O preset inicial preenche fontes descritivas para custos críticos, inclusive zeros **não informados**, sempre classificados como `unknown`, não como tarifa gratuita.
+- O editor avançado mostra essa informação junto a cada variável; alterar o valor classifica-o como `user-input` com a data da edição, sem herdar uma fonte antiga.
+- O wizard classifica respostas confirmadas como informadas pelo usuário; respostas não revisadas preservam a classificação de hipótese.
+- JSONs antigos sem `evidence` permanecem válidos.
+- Os metadados **não** têm efeito nos cálculos; o motor considera os valores numéricos da configuração, e os testes verificam a invariância.
+
+A versão atual **não** possui integração automática para validar links ou buscar preços reais. Qualquer dado classificado como `quote` deve ter sua validade conferida no contrato do fornecedor.
 
 ## 6. Governança
 
