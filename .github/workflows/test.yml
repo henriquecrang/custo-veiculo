@@ -15,3 +15,25 @@ jobs:
           node-version: '22'
       - name: Regression suite
         run: npm test
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install browser test dependencies
+        run: |
+          python3 -m pip install playwright==1.55.0
+          python3 -m playwright install --with-deps chromium
+      - name: Browser smoke (desktop/mobile)
+        run: python3 tests/browser_smoke.py
+      - name: Store browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-screenshots
+          path: artifacts/browser-*.png
+          if-no-files-found: ignore
