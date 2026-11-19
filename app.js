@@ -105,6 +105,23 @@ function renderForm(){
   '<label class="strategy-option"><input type="checkbox" data-strategy="'+id+'" '+(state.selectedScenarioIds.includes(id)?'checked':'')+'><span>'+scenarioNames[id]+'</span></label>'
  ).join('');
 }
+let lastComparison=null;
+let auditedScenario=null;
+function escapeCell(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function renderAudit(comp){
+ const chosen=comp.results.find(x=>x.id===auditedScenario)||comp.results[0];
+ auditedScenario=chosen.id;
+ const e=chosen.economic;
+ const selector='<label class="audit-selector">Estratégia <select id="auditScenario">'+comp.results.map(s=>'<option value="'+s.id+'" '+(s.id===auditedScenario?'selected':'')+'>'+scenarioNames[s.id]+'</option>').join('')+'</select></label>';
+ const rows=e.timeline.map(row=>{
+  const descriptions=row.events.map(v=>escapeCell(v.description)+': '+money(v.amount)).join('; ')||'—';
+  return '<tr><td>'+row.month+'</td><td title="'+descriptions+'">'+row.events.length+' evento(s)</td><td>'+money(row.cashFlow)+'</td><td>'+money(row.cumulativeCashFlow)+'</td><td>'+money(row.opportunityCost)+'</td><td>'+money(row.equivalentCost)+'</td></tr>';
+ }).join('');
+ el('auditPanel').innerHTML=selector+'<div class="table-scroll"><table class="audit-table"><thead><tr><th>Mês</th><th>Lançamentos</th><th>Caixa líquido</th><th>Caixa acumulado</th><th>Oportunidade</th><th>Custo equivalente</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><th>Total</th><td></td><td>'+money(-e.nominalCost)+'</td><td></td><td>'+money(e.opportunityCost)+'</td><td>'+money(e.equivalentCost)+'</td></tr></tfoot></table></div>'+
+ '<details class="events-expand"><summary>Ver todos os lançamentos individuais ('+e.contributions.length+')</summary><div class="table-scroll"><table class="audit-table"><thead><tr><th>Mês</th><th>Categoria</th><th>Descrição</th><th>Fluxo de caixa</th><th>Custo equivalente</th><th>Oportunidade</th></tr></thead><tbody>'+
+ e.contributions.map(c=>'<tr><td>'+c.month+'</td><td>'+escapeCell(c.category)+'</td><td>'+escapeCell(c.description)+'</td><td>'+money(c.amount)+'</td><td>'+money(c.equivalentCost)+'</td><td>'+money(c.opportunityCost)+'</td></tr>').join('')+
+ '</tbody></table></div></details>';
+}
 function renderResults(){
  const err=defaults.validateConfig(state);
  const errors=el('errors');
@@ -112,6 +129,7 @@ function renderResults(){
  errors.hidden=true;
  saveCurrentState();
  const result=engine.compareScenarios(state);
+ lastComparison=result;
  const index=Object.fromEntries(result.results.map(x=>[x.id,x]));
  const winner=index[result.leastCostScenarioId];
  const runner=result.rankedScenarioIds[1] ? index[result.rankedScenarioIds[1]] : null;
@@ -126,6 +144,7 @@ function renderResults(){
   '</article>';
  }).join('');
  el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
+ renderAudit(result);
 }
 function handleEditor(evt){
  const control=evt.target.closest('[data-path]');
@@ -145,6 +164,25 @@ el('scenarioSelector').addEventListener('change',evt=>{
  if(evt.target.checked)selected.add(id);else selected.delete(id);
  state.selectedScenarioIds=defaults.SCENARIOS.filter(x=>selected.has(x));
  renderResults();
+});
+el('auditPanel').addEventListener('change',event=>{
+ if(event.target.id==='auditScenario' && lastComparison){
+  auditedScenario=event.target.value;
+  renderAudit(lastComparison);
+ }
+});
+el('downloadCsv').addEventListener('click',()=>{
+ if(!lastComparison)return;
+ const s=lastComparison.results.find(x=>x.id===auditedScenario)||lastComparison.results[0];
+ const q=x=>'"'+String(x).replace(/"/g,'""')+'"';
+ const rows=[['mes','categoria','descricao','fluxo_caixa','custo_nominal','custo_equivalente','oportunidade']];
+ for(const c of s.economic.contributions)
+  rows.push([c.month,c.category,c.description,c.amount,c.nominalCost,c.equivalentCost,c.opportunityCost]);
+ const text=rows.map(row=>row.map(q).join(',')).join(String.fromCharCode(10));
+ const url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));
+ const link=document.createElement('a');link.href=url;link.download='custo-veiculo-memoria-'+s.id+'.csv';
+ document.body.appendChild(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),0);
 });
 el('restoreButton').addEventListener('click',()=>{
  if(!window.confirm('Restaurar as premissas ilustrativas? Baixe um JSON antes se quiser preservar sua simulação.')) return;
