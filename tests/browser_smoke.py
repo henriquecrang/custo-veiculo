@@ -32,7 +32,7 @@ class BrowserSmoke(unittest.TestCase):
         cls.thread.start()
         cls.url = "http://127.0.0.1:%d/" % cls.server.server_address[1]
         cls.playwright = sync_playwright().start()
-        cls.browser = cls.playwright.chromium.launch(headless=True)
+        cls.browser = cls.playwright.chromium.launch(channel='chrome', headless=True)
 
     @classmethod
     def tearDownClass(cls):
