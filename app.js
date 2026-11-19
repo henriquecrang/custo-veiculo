@@ -95,7 +95,15 @@ function renderResults(){
  const winner=index[result.leastCostScenarioId];
  const runner=result.rankedScenarioIds[1] ? index[result.rankedScenarioIds[1]] : null;
  el('resultSummary').innerHTML='<div class="summary"><span class="eyebrow">MENOR CUSTO ECONÔMICO</span><div class="big">'+scenarioNames[winner.id]+'</div><p>Considerando '+state.horizonMonths+' meses e taxa alternativa de '+percent(state.economics.opportunityAnnualNet)+' líquida a.a.</p><div class="stats"><div><small>Total equivalente</small><strong>'+money(winner.economic.equivalentCost)+'</strong></div><div><small>Mensal equivalente</small><strong>'+money(winner.economic.monthlyEquivalent)+'</strong></div>'+(runner?'<div><small>Diferença para o 2º</small><strong>'+money(runner.economic.equivalentCost-winner.economic.equivalentCost)+'</strong></div>':'')+'</div></div>';
- el('resultCards').innerHTML=result.results.map(s=>'<article class="result-card '+(s.id===winner.id?'best':'')+'"><div class="top"><div><div class="name">'+scenarioNames[s.id]+'</div>'+(s.id===winner.id?'<div class="best-tag">MENOR CUSTO</div>':'')+'</div><div class="total">'+money(s.economic.equivalentCost)+'</div></div><div class="meta"><span>Mensal: '+money(s.economic.monthlyEquivalent)+'</span><span>Saída líquida nominal: '+money(s.economic.nominalCost)+'</span><span>Oportunidade: '+money(s.economic.opportunityCost)+'</span></div></article>').join('');
+ el('resultCards').innerHTML=result.results.map(s=>{
+  const e=s.economic;
+  const financial=s.loan ? '<span>Parcela inicial: '+money(s.loan.schedule.rows[1].payment)+'</span><span>Saldo para quitar: '+money(s.debtSettlement.remainingPrincipal)+'</span>' : '';
+  const sale=s.sale ? '<span>Revenda líquida: '+money(s.sale.netProceeds)+'</span><span>Disponível após quitar: '+money(s.terminalNetFromSale)+'</span>' : '';
+  return '<article class="result-card '+(s.id===winner.id?'best':'')+'"><div class="top"><div><div class="name">'+scenarioNames[s.id]+'</div>'+(s.id===winner.id?'<div class="best-tag">MENOR CUSTO</div>':'')+'</div><div class="total">'+money(e.equivalentCost)+'</div></div>'+
+  '<div class="meta"><span>Mensal equivalente: '+money(e.monthlyEquivalent)+'</span><span>Desembolso líquido nominal: '+money(e.nominalCost)+'</span><span>Custo de oportunidade: '+money(e.opportunityCost)+'</span></div>'+
+  '<div class="result-details"><span>Capital de caixa máximo exigido: <strong>'+money(e.maxCapitalNeed)+'</strong></span><span>Saída no início: <strong>'+money(s.acquisitionCash)+'</strong></span>'+financial+sale+'</div>'+
+  '</article>';
+ }).join('');
  el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
 }
 function handleEditor(evt){
