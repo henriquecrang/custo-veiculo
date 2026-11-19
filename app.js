@@ -3,6 +3,7 @@
 const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
 const equilibrium=window.CustoVeiculoEquilibrium;
+const sensitivity=window.CustoVeiculoSensitivity;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
 const STORAGE_KEY='custo-veiculo-simulacao-v1';
 function readSavedState(){
@@ -123,6 +124,22 @@ function renderAudit(comp){
  e.contributions.map(c=>'<tr><td>'+c.month+'</td><td>'+escapeCell(c.category)+'</td><td>'+escapeCell(c.description)+'</td><td>'+money(c.amount)+'</td><td>'+money(c.equivalentCost)+'</td><td>'+money(c.opportunityCost)+'</td></tr>').join('')+
  '</tbody></table></div></details>';
 }
+
+function renderSensitivity(cfg){
+ if(!sensitivity)return;
+ const data=sensitivity.calculate(cfg);
+ const moneyRef=n=>money(n);
+ const heads=data.resaleFactors.map((f,i)=>'<th scope="col">'+(100*f).toFixed(0)+'%<small>'+moneyRef(data.baseResalePrice*f)+'</small></th>').join('');
+ const rows=data.rows.map((row,r)=>'<tr><th scope="row">'+(100*row.rentFactor).toFixed(0)+'%<small>'+moneyRef(data.baseMonthlyRent*row.rentFactor)+'/mês</small></th>'+
+ row.cells.map((cell,c)=>{
+  const isBase=r===2&&c===2;
+  const label=scenarioNames[cell.winnerId]||cell.winnerId;
+  return '<td class="'+(isBase?'sensitivity-base':'')+'" title="'+escapeCell('Vencedor: '+label+'; custo equivalente '+moneyRef(cell.cost))+'">'+
+   '<span class="sensitivity-winner">'+escapeCell(label)+'</span><small>'+moneyRef(cell.cost)+'</small></td>';
+ }).join('')+'</tr>').join('');
+ el('sensitivityPanel').innerHTML='<div class="table-scroll"><table class="sensitivity-table"><caption>Vencedor financeiro por hipótese. Colunas: preço de revenda de referência; linhas: mensalidade do aluguel. 100% é o cenário atual. Os valores menores de custo são preferíveis.</caption><thead><tr><th scope="col">Aluguel \\ Revenda</th>'+heads+'</tr></thead><tbody>'+rows+'</tbody></table></div><p class="chart-note">A grade considera todas as estratégias selecionadas. Não representa probabilidade dos preços; altere os valores-base nos campos acima para estudar outras hipóteses.</p>';
+}
+
 function renderBreakEven(cfg,comp){
  if(!comp.results.some(x=>x.id==='subscription')){el('breakEvenPanel').innerHTML='';return}
  const purchases=comp.results.filter(x=>x.id!=='subscription');
@@ -158,6 +175,7 @@ function renderResults(){
  el('resultWarnings').innerHTML=result.warnings.length?'<div class="warning-panel">'+result.warnings.join(' ')+'</div>':'';
  renderAudit(result);
  renderBreakEven(state,result);
+ renderSensitivity(state);
 }
 function handleEditor(evt){
  const control=evt.target.closest('[data-path]');
