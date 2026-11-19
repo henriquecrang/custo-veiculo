@@ -347,3 +347,50 @@ O resultado deve ser **reproduzível apenas com o JSON da simulação e a versã
 ---
 
 *Este documento fixa decisões iniciais de produto e orientação de implementação. Premissas de mercado e regras contratuais continuam sujeitas a confirmação; alterações futuras devem ser registradas no Git e refletidas nos testes e na especificação canônica.*
+
+## 14. Backlog de implementação no GitHub (19/11/2026)
+
+O trabalho está decomposto em issues executáveis, com escopo, critérios de aceite e dependências. Os prefixos de título servem como prioridade; detalhes e estado atualizado pertencem às próprias issues. **As issues abertas não significam funcionalidades prontas.** A [Issue #1](https://github.com/henriquecrang/custo-veiculo/issues/1) e o [PR #2](https://github.com/henriquecrang/custo-veiculo/pull/2) tratam deste planejamento inicial.
+
+### P0 — motor e fundação
+
+- [#3](https://github.com/henriquecrang/custo-veiculo/issues/3) — [Fundação] Configurar governança GitHub, AGENTS.md, CI e proteção da main
+- [#4](https://github.com/henriquecrang/custo-veiculo/issues/4) — [Modelo] Especificar contratos financeiros, datas, fluxos e invariantes
+- [#5](https://github.com/henriquecrang/custo-veiculo/issues/5) — [Modelo] Criar schema versionado de simulação, validação e defaults
+- [#6](https://github.com/henriquecrang/custo-veiculo/issues/6) — [Motor] Implementar fluxo de caixa mensal e equivalência financeira
+- [#7](https://github.com/henriquecrang/custo-veiculo/issues/7) — [Financiamento] Construir tabelas Price e SAC auditáveis
+- [#8](https://github.com/henriquecrang/custo-veiculo/issues/8) — [Financiamento] Modelar IOF, tarifas, CET e quitação antecipada
+- [#9](https://github.com/henriquecrang/custo-veiculo/issues/9) — [Propriedade] Modelar IPVA, seguro, licenciamento e despesas com carro parado
+- [#10](https://github.com/henriquecrang/custo-veiculo/issues/10) — [Veículo] Modelar depreciação, valor residual e revenda particular versus loja
+- [#11](https://github.com/henriquecrang/custo-veiculo/issues/11) — [Locação] Implementar motor contratual de assinatura e aluguel mensal
+- [#12](https://github.com/henriquecrang/custo-veiculo/issues/12) — [Motor] Integrar estratégias e reconciliar custos econômicos e patrimônio
+- [#13](https://github.com/henriquecrang/custo-veiculo/issues/13) — [Qualidade] Criar regressões numéricas independentes e auditoria de reconciliação
+
+### P1 — MVP utilizável
+
+- [#14](https://github.com/henriquecrang/custo-veiculo/issues/14) — [Presets] Criar cenário Rio R$ 80 mil/entrada R$ 16 mil/12 meses e exemplos
+- [#15](https://github.com/henriquecrang/custo-veiculo/issues/15) — [UI] Construir shell responsivo e editor de premissas em blocos
+- [#16](https://github.com/henriquecrang/custo-veiculo/issues/16) — [Resultados] Criar dashboard de comparação e indicadores de liquidez
+- [#17](https://github.com/henriquecrang/custo-veiculo/issues/17) — [Auditoria] Exibir memória de cálculo e cronograma mensal detalhado
+- [#18](https://github.com/henriquecrang/custo-veiculo/issues/18) — [Visualização] Gráficos de custo econômico, caixa e evolução mensal
+- [#19](https://github.com/henriquecrang/custo-veiculo/issues/19) — [Persistência] Autosave local, importação/exportação JSON e migrações
+- [#20](https://github.com/henriquecrang/custo-veiculo/issues/20) — [Wizard] Implementar criação guiada de novas simulações
+- [#21](https://github.com/henriquecrang/custo-veiculo/issues/21) — [Equilíbrio] Calcular aluguel mensal e preço de revenda de indiferença
+- [#22](https://github.com/henriquecrang/custo-veiculo/issues/22) — [Sensibilidade] Criar análise de revenda × mensalidade e faixas de incerteza
+- [#23](https://github.com/henriquecrang/custo-veiculo/issues/23) — [Comparabilidade] Alertar para veículos, prazos e disponibilidade não equivalentes
+- [#24](https://github.com/henriquecrang/custo-veiculo/issues/24) — [Evidências] Documentar fontes, vigência e responsabilidade por cada custo
+- [#25](https://github.com/henriquecrang/custo-veiculo/issues/25) — [QA] Realizar testes de interface, acessibilidade e regressão ponta a ponta
+- [#26](https://github.com/henriquecrang/custo-veiculo/issues/26) — [Publicação] Publicar MVP no GitHub Pages com README de uso e limites
+
+### P2 — flexibilidade e aprofundamentos
+
+- [#27](https://github.com/henriquecrang/custo-veiculo/issues/27) — [Flexibilidade] Simular aluguel intermitente por meses selecionados
+- [#28](https://github.com/henriquecrang/custo-veiculo/issues/28) — [Revenda] Simular tempo de anúncio, venda atrasada e liquidez
+- [#29](https://github.com/henriquecrang/custo-veiculo/issues/29) — [Patrimônio] Comparar vender no horizonte versus continuar com o veículo
+- [#30](https://github.com/henriquecrang/custo-veiculo/issues/30) — [Uso] Detalhar combustível, quilometragem, desgaste e custos de viagem
+- [#31](https://github.com/henriquecrang/custo-veiculo/issues/31) — [Macroeconomia] Evoluir CDI, tributação por prazo e inflação real
+- [#32](https://github.com/henriquecrang/custo-veiculo/issues/32) — [Propostas] Comparar múltiplos carros, financiamentos e ofertas de assinatura
+- [#33](https://github.com/henriquecrang/custo-veiculo/issues/33) — [Riscos] Modelar multas de rescisão, franquias, avarias e custos inesperados
+- [#34](https://github.com/henriquecrang/custo-veiculo/issues/34) — [Decisão] Explicitar valor da flexibilidade, trabalho e fatores não monetários
+
+**Ordem sugerida de execução:** integrar primeiro a documentação de #1, estabelecer workflow/CI (#3), especificar regras (#4) e configuração (#5), desenvolver motor com regressões (#6–#13), implementar a interface e publicação (#14–#26) e deixar as melhorias P2 (#27–#34) para depois da validação do MVP.
