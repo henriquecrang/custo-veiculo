@@ -84,6 +84,7 @@ class BrowserSmoke(unittest.TestCase):
         expect(page.locator(".result-card")).to_have_count(4)
         self.assertEqual(page.locator("#breakEvenPanel").inner_text().strip(), "")
         self.assertEqual(self.saved()["selectedScenarioIds"].count("subscription"), 0)
+        page.locator(".config-section").nth(2).locator("summary").click()
         page.locator('input[data-path="financing.downPayment"]').fill("100000")
         expect(page.locator("#errors")).to_be_visible()
         self.assertIn("downPayment", page.locator("#errors").inner_text())
