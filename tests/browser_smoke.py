@@ -127,7 +127,19 @@ class BrowserSmoke(unittest.TestCase):
         page.locator('input[data-path="vehicle.price"]').fill("91000")
         # Track the real upload event and confirmation, not just a localStorage snapshot.
         page.evaluate("""() => {
-            window.__importDiagnostics = {changes: 0, confirms: []};
+            window.__importDiagnostics = {changes: 0, confirms: [],writes: [],rejections: []};
+            const originalSet=Storage.prototype.setItem;
+            Storage.prototype.setItem=function(key,value) {
+              if(key==='custo-veiculo-simulacao-v1') {
+                let price;
+                try { price=JSON.parse(value).vehicle.price } catch(err) { price='invalid' }
+                window.__importDiagnostics.writes.push(price);
+              }
+              return originalSet.call(this,key,value);
+            };
+            window.addEventListener('unhandledrejection', event => {
+              window.__importDiagnostics.rejections.push(String(event.reason));
+            });
             document.getElementById('importFile').addEventListener('change', event => {
               window.__importDiagnostics.changes += 1;
               window.__importDiagnostics.filename = event.target.files?.[0]?.name ?? null;
@@ -151,7 +163,9 @@ class BrowserSmoke(unittest.TestCase):
                 upload: window.__importDiagnostics,
                 errors: document.getElementById('errors').textContent,
                 errorHidden: document.getElementById('errors').hidden,
-                currentPrice: JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price
+                currentPrice: JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price,
+                inputPrice: document.querySelector('[data-path="vehicle.price"]')?.value,
+                saveStatus: document.getElementById('saveStatus').textContent
             })""")
             self.fail("Import did not update local state: " + json.dumps(diagnostic))
         expect(page.locator("#errors")).to_be_hidden()
