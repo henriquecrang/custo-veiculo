@@ -28,6 +28,7 @@
 - Segunda tentativa: três de quatro testes de navegador concluídos; a verificação de importação estava sujeita a uma corrida assíncrona.
 - Terceira tentativa: teste de importação passou a esperar a persistência no `localStorage` antes de comparar.
 - Quarta tentativa: confirmação nativa substituída por callback determinístico no teste; a lógica de confirmação do aplicativo permanece exercitada no teste de restauração.
+- Erro real identificado: importação podia ser sobrescrita por evento `change` pendente do campo ainda focado; resolvido com `blur()` antes da substituição (PR #70, Issue #68). Overflow mobile corrigido no PR #69 e confirmado no Chromium.
 - **CI final:** verificar os jobs `regression` e `browser` no PR #64. Não declarar a issue concluída enquanto algum job estiver sem `success`.
 
 ## Verificações que o smoke não prova
