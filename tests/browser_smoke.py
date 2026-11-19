@@ -130,6 +130,10 @@ class BrowserSmoke(unittest.TestCase):
             "name": "preset.json", "mimeType": "application/json",
             "buffer": json.dumps(original).encode("utf-8")
         })
+        page.wait_for_function(
+            "expected => JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price === expected",
+            arg=original["vehicle"]["price"]
+        )
         expect(page.locator("#errors")).to_be_hidden()
         self.assertEqual(self.saved()["vehicle"]["price"], original["vehicle"]["price"])
         page.locator("#importFile").set_input_files({
