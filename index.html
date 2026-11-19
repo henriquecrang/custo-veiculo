@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compare o custo econômico de comprar, financiar ou assinar um carro, incluindo desvalorização, transações e custo de oportunidade.">
+  <title>Custo Veículo — Comprar × Alugar</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="model/config.js"></script>
+  <script defer src="model/cashflows.js"></script>
+  <script defer src="model/financing.js"></script>
+  <script defer src="model/finance-fees.js"></script>
+  <script defer src="model/ownership.js"></script>
+  <script defer src="model/resale.js"></script>
+  <script defer src="model/rental.js"></script>
+  <script defer src="model/scenario-engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="page-width header-grid">
+      <div class="brand">
+        <span class="eyebrow">SIMULADOR FINANCEIRO · VERSÃO INICIAL</span>
+        <h1>Custo Veículo</h1>
+        <p>Comprar à vista, financiar ou alugar? Compare o custo efetivo de cada alternativa, inclusive o dinheiro que deixa de render.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="restoreButton" class="button button-quiet">Restaurar premissas</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-width">
+    <section class="disclaimer" aria-label="Premissas da simulação">
+      <strong>Simulação, não cotação.</strong> Preços, juros, revenda, taxas e assinatura são referências ilustrativas e editáveis. O Argo de assinatura não é necessariamente equivalente ao seminovo de R$ 80 mil.
+    </section>
+    <div class="app-layout">
+      <section class="config-column" aria-labelledby="configHeading">
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">01 · CONFIGURAÇÃO</span>
+            <h2 id="configHeading">Premissas do cenário</h2>
+            <p>Modifique os valores para recalcular todas as estratégias.</p>
+          </div>
+        </div>
+        <div id="scenarioSelector" class="selector-panel"></div>
+        <div id="inputSections" class="section-stack"></div>
+      </section>
+      <section class="results-column" aria-labelledby="resultsHeading">
+        <div class="results-sticky">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">02 · ANÁLISE</span>
+              <h2 id="resultsHeading">Comparação financeira</h2>
+              <p>Custos equivalentes ao final do período, com o mesmo benchmark financeiro.</p>
+            </div>
+          </div>
+          <div id="errors" class="error-panel" role="alert" hidden></div>
+          <div id="resultSummary" aria-live="polite"></div>
+          <div id="resultCards" class="result-list"></div>
+          <div id="resultWarnings"></div>
+          <p class="footnote">Valor negativo representa ganho econômico. Custos de transação não informados podem começar em zero — revise os contratos reais. Valores finais não substituem propostas de financeiras ou locadoras.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
