@@ -27,7 +27,7 @@ jobs:
       - name: Install browser test dependencies
         run: |
           python3 -m pip install playwright==1.55.0
-          python3 -m playwright install --with-deps chromium
+          google-chrome --version
       - name: Browser smoke (desktop/mobile)
         run: python3 tests/browser_smoke.py
       - name: Store browser screenshots
