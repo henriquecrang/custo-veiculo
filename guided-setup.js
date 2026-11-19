@@ -56,6 +56,8 @@
   let target=next.config;
   for(const key of path.slice(0,-1))target=target[key];
   target[path.at(-1)]=result;
+  next.config.evidence??={};
+  next.config.evidence[question.path]={kind:'user-input',asOf:new Date().toISOString().slice(0,10),note:'Confirmado na simulação guiada'};
   return next;
  }
  function buildConfig(draft){
