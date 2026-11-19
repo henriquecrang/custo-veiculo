@@ -4,6 +4,7 @@ const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
 const equilibrium=window.CustoVeiculoEquilibrium;
 const sensitivity=window.CustoVeiculoSensitivity;
+const guided=window.CustoVeiculoGuided;
 const charts=window.CustoVeiculoCharts;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
 const STORAGE_KEY='custo-veiculo-simulacao-v1';
@@ -258,5 +259,79 @@ el('importFile').addEventListener('change',async event=>{
   event.target.value='';
  }
 });
+
+let guidedDraft=null;
+let guidedStep=0;
+function renderGuided(){
+ if(!guidedDraft||!guided)return;
+ const questions=guided.questions(guidedDraft),review=guidedStep>=questions.length;
+ const error=el('guidedError');error.hidden=true;error.textContent='';
+ el('guidedProgress').textContent=review?'Revisão final':'Pergunta '+(guidedStep+1)+' de '+questions.length;
+ el('guidedBack').disabled=guidedStep===0;
+ el('guidedNext').textContent=review?'Criar simulação':'Continuar';
+ if(review){
+  el('guidedTitle').textContent='Revisar escolhas';
+  el('guidedBody').innerHTML='<p>Estas escolhas vão gerar uma nova simulação a partir de referências ilustrativas. Revise taxas, contratos e custos detalhados no editor avançado.</p><div class="guided-review">'+questions.map((q,i)=>{
+   const value=guided.displayValue(guidedDraft,q);
+   const formatted=q.type==='select'?(q.options.find(v=>v.value===value)?.label||value):String(value)+(q.unit?' '+q.unit:'');
+   return '<button type="button" class="guided-review-row" data-guided-edit="'+i+'"><span>'+escapeCell(q.label)+'</span><strong>'+escapeCell(formatted)+'</strong></button>';
+  }).join('')+'</div>';
+  return;
+ }
+ const q=questions[guidedStep];
+ el('guidedTitle').textContent=q.label;
+ const current=guided.displayValue(guidedDraft,q);
+ const ctrl=q.type==='select'
+  ?'<select id="guidedAnswer">'+q.options.map(x=>'<option value="'+escapeCell(x.value)+'"'+(x.value===current?' selected':'')+'>'+escapeCell(x.label)+'</option>').join('')+'</select>'
+  :'<input id="guidedAnswer" type="'+(q.type==='text'?'text':'number')+'" value="'+escapeCell(current)+'"'+(q.type==='number'?' min="'+(q.min??0)+'"'+(q.max!==undefined?' max="'+q.max+'"':'')+' step="'+(q.step||1)+'"':'')+' aria-label="'+escapeCell(q.label)+'">';
+ el('guidedBody').innerHTML='<div class="guided-question"><label for="guidedAnswer">'+escapeCell(q.label)+'</label>'+ctrl+(q.unit?'<span class="guided-unit">'+escapeCell(q.unit)+'</span>':'')+(q.help?'<p class="helper">'+escapeCell(q.help)+'</p>':'')+'</div>';
+ el('guidedAnswer')?.focus();
+}
+function guidedAdvance(){
+ if(!guidedDraft)return;
+ const questions=guided.questions(guidedDraft);
+ const err=el('guidedError');
+ if(guidedStep>=questions.length){
+  try{
+   const next=guided.buildConfig(guidedDraft);
+   state=next;
+   renderForm();renderResults();
+   el('guidedDialog').close();
+   guidedDraft=null;
+  }catch(e){err.hidden=false;err.textContent=e.message;}
+  return;
+ }
+ try{
+  const input=el('guidedAnswer');
+  const newDraft=guided.setAnswer(guidedDraft,questions[guidedStep],input.value);
+  guidedDraft=newDraft;
+  guidedStep=Math.min(guidedStep+1,guided.questions(guidedDraft).length);
+  renderGuided();
+ }catch(e){err.hidden=false;err.textContent=e.message}
+}
+el('openGuidedSetup').addEventListener('click',()=>{
+ if(!guided){window.alert('Assistente indisponível');return}
+ guidedDraft=guided.createDraft();
+ guidedStep=0;
+ el('guidedDialog').showModal();
+ renderGuided();
+});
+el('guidedClose').addEventListener('click',()=>el('guidedDialog').close());
+el('guidedDialog').addEventListener('close',()=>{guidedDraft=null;guidedStep=0});
+el('guidedBack').addEventListener('click',()=>{if(guidedDraft){guidedStep=Math.max(0,guidedStep-1);renderGuided()}});
+el('guidedNext').addEventListener('click',guidedAdvance);
+el('guidedBackup').addEventListener('click',()=>el('exportButton').click());
+el('guidedBody').addEventListener('click',e=>{
+ const button=e.target.closest('[data-guided-edit]');
+ if(!button||!guidedDraft)return;
+ guidedStep=Number(button.dataset.guidedEdit);
+ renderGuided();
+});
+el('guidedBody').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.id==='guidedAnswer'&&e.target.tagName!=='TEXTAREA'){
+  e.preventDefault();guidedAdvance();
+ }
+});
+
 renderForm();renderResults();
 })();

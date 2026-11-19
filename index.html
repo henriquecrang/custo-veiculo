@@ -17,6 +17,7 @@
   <script defer src="model/equilibrium.js"></script>
   <script defer src="charts.js"></script>
   <script defer src="sensitivity.js"></script>
+  <script defer src="guided-setup.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -28,6 +29,7 @@
         <p>Comprar à vista, financiar ou alugar? Compare o custo efetivo de cada alternativa, inclusive o dinheiro que deixa de render.</p>
       </div>
       <div class="header-actions">
+        <button type="button" id="openGuidedSetup" class="button">Nova simulação guiada</button>
         <button type="button" id="exportButton" class="button">Baixar JSON</button>
         <button type="button" id="importButton" class="button button-quiet">Carregar JSON</button>
         <button type="button" id="restoreButton" class="button button-quiet">Restaurar premissas</button>
@@ -41,6 +43,15 @@
       <strong>Simulação, não cotação.</strong> Preços, juros, revenda, taxas e assinatura são referências ilustrativas e editáveis. O Argo de assinatura não é necessariamente equivalente ao seminovo de R$ 80 mil.
     </section>
     <p id="saveStatus" class="save-status" role="status">Os dados são guardados localmente neste dispositivo. Baixe o JSON para fazer backup.</p>
+    <dialog id="guidedDialog" class="guided-dialog" aria-labelledby="guidedTitle">
+      <div class="guided-shell">
+        <div class="guided-header"><div><span class="eyebrow">CONFIGURAÇÃO GUIADA</span><h2 id="guidedTitle">Nova simulação</h2><p>Uma pergunta por vez. Sua simulação atual só será substituída ao confirmar.</p></div><button type="button" id="guidedClose" class="button button-quiet" aria-label="Cancelar a nova simulação">Fechar</button></div>
+        <div class="guided-progress" id="guidedProgress"></div>
+        <div id="guidedError" class="guided-error" role="alert" hidden></div>
+        <div id="guidedBody"></div>
+        <div class="guided-actions"><button type="button" id="guidedBackup" class="button button-quiet">Baixar simulação atual</button><div class="guided-nav"><button type="button" id="guidedBack" class="button button-quiet">Voltar</button><button type="button" id="guidedNext" class="button">Continuar</button></div></div>
+      </div>
+    </dialog>
     <div class="app-layout">
       <section class="config-column" aria-labelledby="configHeading">
         <div class="panel-heading">
