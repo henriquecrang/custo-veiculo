@@ -11,7 +11,7 @@
   ]);
 
   function createDefaultConfig() {
-    return {
+    const base = {
       schemaVersion: SCHEMA_VERSION,
       name: 'Rio — seminovo R$ 80 mil, carro parado (simulação)',
       horizonMonths: 12,
@@ -77,6 +77,24 @@
         inflationAnnual: 0.043
       }
     };
+    // Classificação documental não afeta os cálculos financeiros.
+    base.evidence = {
+      'vehicle.price': {kind:'hypothesis',asOf:'2026-11-19',note:'Carro hipotético, não anúncio verificado'},
+      'vehicle.residualPrice': {kind:'hypothesis',asOf:'2026-11-19',note:'Revenda projetada (10% em 12 meses)'},
+      'financing.monthlyInterestRate': {kind:'hypothesis',asOf:'2026-11-19',note:'Taxa ilustrativa; conferir CET e proposta do banco'},
+      'financing.iof.amount': {kind:'unknown',asOf:'2026-11-19',note:'Zero significa IOF não informado, não isenção'},
+      'financing.upfrontCosts': {kind:'unknown',asOf:'2026-11-19',note:'Tarifas bancárias ainda não informadas'},
+      'purchase.initialCosts': {kind:'unknown',asOf:'2026-11-19',note:'Transferência e vistoria ainda não orçadas'},
+      'ownership.ipvaAnnual': {kind:'hypothesis',asOf:'2026-11-19',note:'Provisão 4% do valor de compra; confirmar base de incidência RJ'},
+      'ownership.insuranceAnnual': {kind:'hypothesis',asOf:'2026-11-19',note:'Provisão, não cotação de seguro'},
+      'ownership.licensingAnnual': {kind:'unknown',asOf:'2026-11-19',note:'Licenciamento ainda não informado'},
+      'ownership.maintenanceMonthly': {kind:'hypothesis',asOf:'2026-11-19',note:'Provisão mensal por tempo, carro parado'},
+      'resale.privateFixedCosts': {kind:'hypothesis',asOf:'2026-11-19',note:'Provisão para anúncios'},
+      'resale.dealerDiscountPct': {kind:'hypothesis',asOf:'2026-11-19',note:'Desconto de loja estimado, não oferta vinculante'},
+      'subscription.monthlyRent': {kind:'hypothesis',asOf:'2026-11-19',note:'Referência ilustrativa de Argo, não carro equivalente'},
+      'economics.opportunityAnnualNet': {kind:'hypothesis',asOf:'2026-11-19',note:'Retorno alternativo líquido assumido, não garantido'}
+    };
+    return base;
   }
 
   const validators = {
@@ -172,6 +190,21 @@
     const confirmed=field(cfg,'subscription.equivalenceConfirmed');
     if(confirmed!==undefined&&typeof confirmed!=='boolean')
       errors.push('subscription.equivalenceConfirmed precisa ser booleano');
+    if(cfg.evidence!==undefined){
+      if(!cfg.evidence || typeof cfg.evidence!=='object' || Array.isArray(cfg.evidence)){
+        errors.push('evidence deve ser um objeto por caminho');
+      } else {
+        for(const [path,entry] of Object.entries(cfg.evidence)){
+          if(!entry || typeof entry!=='object' || Array.isArray(entry) ||
+              !['hypothesis','official','quote','user-input','derived','unknown'].includes(entry.kind) ||
+              (entry.asOf!==undefined && (typeof entry.asOf!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(entry.asOf))) ||
+              (entry.note!==undefined && (typeof entry.note!=='string'||entry.note.length>600)) ||
+              (entry.url!==undefined && (typeof entry.url!=='string'||!/^https:\/\/[^ <>]+$/.test(entry.url)))){
+            errors.push('evidence.'+path+' inválido');
+          }
+        }
+      }
+    }
     return errors;
   }
 
