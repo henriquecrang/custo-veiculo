@@ -125,7 +125,8 @@ class BrowserSmoke(unittest.TestCase):
         original = json.loads(Path(downloaded.path()).read_text(encoding="utf-8"))
         self.assertIn("schemaVersion", original)
         page.locator('input[data-path="vehicle.price"]').fill("91000")
-        page.once("dialog", lambda dialog: dialog.accept())
+        # Confirm the import deterministically; confirmation dialog itself is tested by restore.
+        page.evaluate("() => { window.confirm = () => true }")
         page.locator("#importFile").set_input_files({
             "name": "preset.json", "mimeType": "application/json",
             "buffer": json.dumps(original).encode("utf-8")
