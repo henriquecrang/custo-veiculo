@@ -3,7 +3,27 @@
 const defaults=window.CustoVeiculoConfig;
 const engine=window.CustoVeiculoEngine;
 if(!defaults || !engine)throw new Error('Módulos do simulador ausentes');
-let state=defaults.createDefaultConfig();
+const STORAGE_KEY='custo-veiculo-simulacao-v1';
+function readSavedState(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return null;
+  const parsed=JSON.parse(raw);
+  defaults.assertValidConfig(parsed);
+  return parsed;
+ }catch(error){return null}
+}
+let state=readSavedState() || defaults.createDefaultConfig();
+function saveCurrentState(){
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  const status=document.getElementById('saveStatus');
+  if(status)status.textContent='Premissas salvas neste navegador';
+ }catch(error){
+  const status=document.getElementById('saveStatus');
+  if(status)status.textContent='Salvamento local indisponível; exporte o JSON';
+ }
+}
 const BRL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
 const money=x=>BRL.format(x);
 const percent=x=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(100*x)+'%';
@@ -90,6 +110,7 @@ function renderResults(){
  const errors=el('errors');
  if(err.length){errors.hidden=false;errors.textContent='Corrija as premissas:\n'+err.join('\n');return}
  errors.hidden=true;
+ saveCurrentState();
  const result=engine.compareScenarios(state);
  const index=Object.fromEntries(result.results.map(x=>[x.id,x]));
  const winner=index[result.leastCostScenarioId];
@@ -126,8 +147,39 @@ el('scenarioSelector').addEventListener('change',evt=>{
  renderResults();
 });
 el('restoreButton').addEventListener('click',()=>{
+ if(!window.confirm('Restaurar as premissas ilustrativas? Baixe um JSON antes se quiser preservar sua simulação.')) return;
  state=defaults.createDefaultConfig();
  renderForm();renderResults();
+});
+el('exportButton').addEventListener('click',()=>{
+ if(defaults.validateConfig(state).length){window.alert('Corrija os campos inválidos antes de exportar.');return}
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement('a');
+ link.href=url;
+ link.download='custo-veiculo-simulacao.json';
+ document.body.appendChild(link);
+ link.click();
+ link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),0);
+});
+el('importButton').addEventListener('click',()=>el('importFile').click());
+el('importFile').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];
+ if(!file)return;
+ try{
+  const candidate=JSON.parse(await file.text());
+  defaults.assertValidConfig(candidate);
+  if(!window.confirm('Substituir a simulação atual pelo JSON importado? Faça um backup se necessário.'))return;
+  state=candidate;
+  renderForm();renderResults();
+ }catch(error){
+  const errors=el('errors');
+  errors.hidden=false;
+  errors.textContent='Não foi possível importar: '+error.message;
+ }finally{
+  event.target.value='';
+ }
 });
 renderForm();renderResults();
 })();
