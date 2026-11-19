@@ -125,16 +125,35 @@ class BrowserSmoke(unittest.TestCase):
         original = json.loads(Path(downloaded.path()).read_text(encoding="utf-8"))
         self.assertIn("schemaVersion", original)
         page.locator('input[data-path="vehicle.price"]').fill("91000")
-        # Confirm the import deterministically; confirmation dialog itself is tested by restore.
-        page.evaluate("() => { window.confirm = () => true }")
+        # Track the real upload event and confirmation, not just a localStorage snapshot.
+        page.evaluate("""() => {
+            window.__importDiagnostics = {changes: 0, confirms: []};
+            document.getElementById('importFile').addEventListener('change', event => {
+              window.__importDiagnostics.changes += 1;
+              window.__importDiagnostics.filename = event.target.files?.[0]?.name ?? null;
+            }, true);
+            window.confirm = message => {
+              window.__importDiagnostics.confirms.push(message);
+              return true;
+            };
+        }""")
         page.locator("#importFile").set_input_files({
             "name": "preset.json", "mimeType": "application/json",
             "buffer": json.dumps(original).encode("utf-8")
         })
-        page.wait_for_function(
-            "expected => JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price === expected",
-            arg=original["vehicle"]["price"]
-        )
+        try:
+            page.wait_for_function(
+                "expected => JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price === expected",
+                arg=original["vehicle"]["price"], timeout=5000
+            )
+        except Exception:
+            diagnostic = page.evaluate("""() => ({
+                upload: window.__importDiagnostics,
+                errors: document.getElementById('errors').textContent,
+                errorHidden: document.getElementById('errors').hidden,
+                currentPrice: JSON.parse(localStorage.getItem('custo-veiculo-simulacao-v1')).vehicle.price
+            })""")
+            self.fail("Import did not update local state: " + json.dumps(diagnostic))
         expect(page.locator("#errors")).to_be_hidden()
         self.assertEqual(self.saved()["vehicle"]["price"], original["vehicle"]["price"])
         page.locator("#importFile").set_input_files({
@@ -143,6 +162,8 @@ class BrowserSmoke(unittest.TestCase):
         })
         expect(page.locator("#errors")).to_be_visible()
         self.assertEqual(self.saved()["vehicle"]["price"], original["vehicle"]["price"])
+    def test_mobile_layout(self):
+        page = self.page
         page.set_viewport_size({"width": 390, "height": 844})
         self.assertLessEqual(page.evaluate("document.documentElement.scrollWidth"), 391)
         page.screenshot(path=str(ARTIFACTS / "browser-mobile.png"), full_page=True)
