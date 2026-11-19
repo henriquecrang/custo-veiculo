@@ -209,6 +209,8 @@ function handleEditor(evt){
  set(descriptor.path,v);
  state.evidence??={};
  state.evidence[descriptor.path]={kind:'user-input',asOf:new Date().toISOString().slice(0,10),note:'Valor editado no simulador'};
+ const note=control.closest('.field')?.querySelector('.source-note');
+ if(note)note.textContent='Informado por você · '+state.evidence[descriptor.path].asOf+' · Valor editado no simulador';
  renderResults();
 }
 el('inputSections').addEventListener('input',handleEditor);
