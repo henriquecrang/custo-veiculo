@@ -267,6 +267,11 @@ el('importFile').addEventListener('change',async event=>{
   const candidate=JSON.parse(await file.text());
   defaults.assertValidConfig(candidate);
   if(!window.confirm('Substituir a simulação atual pelo JSON importado? Faça um backup se necessário.'))return;
+  // Um input editado pode emitir "change" ao perder o foco quando renderForm()
+  // substitui seus nós. Consuma esse evento ANTES de aplicar o JSON importado,
+  // evitando que a edição antiga sobrescreva a simulação recém-carregada.
+  const active=document.activeElement;
+  if(active?.closest?.('#inputSections'))active.blur();
   const previous=state;
   state=candidate;
   // Commitir o estado validado ANTES de reconstruir os campos. A atualização
