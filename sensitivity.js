@@ -10,7 +10,7 @@
  const factors=Object.freeze([.8,.9,1,1.1,1.2]);
  function calculate(cfg,resaleFactors=factors,rentFactors=factors){
    const baseline=engine.compareScenarios(cfg);
-   const basePrice=resale.referenceValue(cfg.vehicle,cfg.horizonMonths);
+   const basePrice=resale.referenceResalePrice(cfg.vehicle,cfg.horizonMonths);
    if(!Array.isArray(resaleFactors)||!Array.isArray(rentFactors)||!resaleFactors.length||!rentFactors.length)throw new Error('Fatores obrigatórios');
    if([...resaleFactors,...rentFactors].some(x=>!Number.isFinite(x)||x<0))throw new Error('Fator inválido');
    const rows=rentFactors.map(rentFactor=>({
