@@ -105,6 +105,9 @@ function set(path,value){const keys=path.split('.');let x=state;for(const k of k
 function el(id){return document.getElementById(id)}
 function fieldMarkup(field){
  const v=get(field.path);
+ const ev=state.evidence?.[field.path];
+ const sourceNames={'hypothesis':'Hipótese ilustrativa','official':'Fonte oficial','quote':'Proposta comercial','user-input':'Informado por você','derived':'Derivado','unknown':'Não informado'};
+ const sourceText=ev?((sourceNames[ev.kind]||'Origem não definida')+(ev.asOf?' · '+ev.asOf:'')+(ev.note?' · '+ev.note:'')):'Origem não documentada · confirme antes da decisão';
  const value=field.pct ? (v*100) : v;
  const input=field.type==='select'
   ? '<select data-path="'+field.path+'">'+field.options.map(([key,label])=>'<option value="'+key+'" '+(String(v)===key?'selected':'')+'>'+label+'</option>').join('')+'</select>'
@@ -112,7 +115,7 @@ function fieldMarkup(field){
  return '<label class="field '+(field.wide?'wide':'')+'"><span class="field-label">'+field.label+'</span><span class="control">'+
   (field.prefix?'<span class="unit prefix">'+field.unit+'</span>':'')+input+
   (!field.prefix&&field.unit?'<span class="unit">'+field.unit+'</span>':'')+'</span>'+
-  (field.help?'<span class="helper">'+field.help+'</span>':'')+'</label>';
+  (field.help?'<span class="helper">'+field.help+'</span>':'')+'<span class="source-note">'+escapeCell(sourceText)+'</span></label>';
 }
 function renderForm(){
  el('inputSections').innerHTML=groups.map((g,i)=>'<details class="config-section" '+(i<2?'open':'')+'><summary>'+g.title+'</summary><div class="config-fields">'+g.fields.map(fieldMarkup).join('')+'</div></details>').join('');
@@ -204,6 +207,8 @@ function handleEditor(evt){
  const v=descriptor.type==='text'||descriptor.type==='select'
   ? (descriptor.bool?control.value==='true':control.value) : (control.value.trim()===''?NaN:Number(control.value)/(descriptor.pct?100:1));
  set(descriptor.path,v);
+ state.evidence??={};
+ state.evidence[descriptor.path]={kind:'user-input',asOf:new Date().toISOString().slice(0,10),note:'Valor editado no simulador'};
  renderResults();
 }
 el('inputSections').addEventListener('input',handleEditor);
