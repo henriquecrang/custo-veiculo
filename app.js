@@ -267,8 +267,21 @@ el('importFile').addEventListener('change',async event=>{
   const candidate=JSON.parse(await file.text());
   defaults.assertValidConfig(candidate);
   if(!window.confirm('Substituir a simulação atual pelo JSON importado? Faça um backup se necessário.'))return;
+  const previous=state;
   state=candidate;
-  renderForm();renderResults();
+  // Commitir o estado validado ANTES de reconstruir os campos. A atualização
+  // visual posterior não deve impedir a persistência da importação.
+  saveCurrentState();
+  try {
+   renderForm();renderResults();
+   const status=el('saveStatus');
+   if(status)status.textContent='Simulação importada e salva neste navegador';
+  } catch(renderError) {
+   state=previous;
+   saveCurrentState();
+   renderForm();renderResults();
+   throw renderError;
+  }
  }catch(error){
   const errors=el('errors');
   errors.hidden=false;
