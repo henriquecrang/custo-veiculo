@@ -13,7 +13,7 @@ Simulador web estático para comparar **compra à vista, financiamento, assinatu
 - Painel de resultados e memória de cálculo mensal com exportação CSV.
 - Autosave no navegador e importação/exportação JSON versionado.
 - Presets de exemplo em `presets/rio-80k-12m.json` e `presets/rio-60k-12m.json`, com premissas de mercado **não verificadas como cotações reais**.
-- Ponto de equilíbrio de aluguel e revenda: em implementação na [issue #21](https://github.com/henriquecrang/custo-veiculo/issues/21).
+- Ponto de equilíbrio para mensalidade de locação e preço referência de revenda, pelo mesmo motor ([issue #21](https://github.com/henriquecrang/custo-veiculo/issues/21)).
 
 ## Como executar
 
