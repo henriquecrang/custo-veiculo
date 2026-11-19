@@ -35,11 +35,13 @@ O workflow GitHub Actions `tests` executa o job `regression` em PRs e pushes par
 
 ## Publicação GitHub Pages
 
-Publicação estática prevista: `https://henriquecrang.github.io/custo-veiculo/` **(URL esperada, não verificada como ativa)**.
+Endereço esperado: https://henriquecrang.github.io/custo-veiculo/ — **não confundir URL esperada com publicação confirmada**.
 
-Para ativar: no GitHub, abrir **Settings → Pages → Build and deployment → Deploy from a branch**, escolher `main` e `/(root)`. O arquivo `.nojekyll` já está presente. Depois da ativação, verificar a URL e executar ao menos um cenário no navegador; somente então concluir a [issue #26](https://github.com/henriquecrang/custo-veiculo/issues/26).
+O workflow `.github/workflows/pages.yml` publica automaticamente os arquivos estáticos de uma revisão da `main` **após sucesso dos testes** (`regression` e `browser` na suíte `tests`). Ele usa Pages artifact e não requer build ou backend.
 
-> A configuração administrativa do GitHub Pages não está disponível nas ações atuais do conector. Criar arquivos e documentar o deploy **não** significa que ele já tenha sido habilitado.
+Na primeira implantação, o workflow `actions/configure-pages@v5` tenta habilitar Pages (`enablement: true`). **Se o GitHub negar essa operação**, configurar no repositório **Settings → Pages → Build and deployment → Source: GitHub Actions**; o conector atual não possui ação administrativa de Pages.
+
+A publicação só será considerada concluída quando o workflow de deploy estiver verde, o endereço HTTP responder e a simulação renderizar no navegador real. Consulte [plano de publicação e validação](docs/publicacao.md).
 
 ## Modelo e premissas
 
